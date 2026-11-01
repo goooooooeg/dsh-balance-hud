@@ -1,0 +1,46 @@
+{
+  "name": "dsh-balance-hud",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "全境封锁 SHD 风格的余额挂件：表盘常驻 + 点击投射四层全息环，显示余额 / 今日已用 / 峰谷倒计时，带余额提醒（变红 + 语音）与自动吸边",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "balance",
+    "widget",
+    "hud",
+    "the-division"
+  ],
+  "license": "MIT",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "NOTICE.md",
+    "LICENSE",
+    "docs/preview.png",
+    "assets/alert*.mp3"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-theme"
+      ]
+    }
+  }
+}
