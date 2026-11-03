@@ -724,6 +724,7 @@ const FORCE_PEAK_PREVIEW = false // 临时：周末全天谷价，强制转峰�
     })
 
     const RingLayerMemo = React.memo(RingLayer)
+    let ctxRef = null
     function Hud() {
       const [data, setData] = useState(null)
       const [error, setError] = useState('')
@@ -756,6 +757,8 @@ const FORCE_PEAK_PREVIEW = false // 临时：周末全天谷价，强制转峰�
       const alarmAudio = useRef(null)
       const prevAlarm = useRef(false)
       const prevPeak = useRef(null)
+      const doneAt = useRef(0)
+      const statusSeen = useRef(new Map())
       const cue = (name, fxOverride) => {
         try {
           if (readPref(ALERT_VOICE_KEY, '1') === '0') return
@@ -989,7 +992,13 @@ const FORCE_PEAK_PREVIEW = false // 临时：周末全天谷价，强制转峰�
             const j = await r.json()
             if (!j || !j.ok || typeof j.seq !== 'number') return
             if (base === null) { base = j.seq; return }
-            if (j.seq > base) { base = j.seq; cue('done') }
+            if (j.seq > base) {
+              base = j.seq
+              if (!doneAt.current || Date.now() - doneAt.current > 30000) {
+                doneAt.current = Date.now()
+                cue('done')
+              }
+            }
           } catch (err) {}
         }
         const id = setInterval(() => { if (!document.hidden) tick() }, 5000)
@@ -1000,6 +1009,40 @@ const FORCE_PEAK_PREVIEW = false // 临时：周末全天谷价，强制转峰�
         return () => { stopped = true; clearInterval(id); document.removeEventListener('visibilitychange', onVis) }
       }, [])
       // 峰谷切换 → 对应提示音
+      // Background turn-end watcher: same event source as the desktop notification
+      // plugin (api-session/status true -> false). When the window is hidden or
+      // unfocused, play the done voice ourselves instead of waiting for a throttled poll.
+      useEffect(() => {
+        let off = null
+        try {
+          if (!ctxRef || !ctxRef.remote || typeof ctxRef.remote.$on !== 'function') return undefined
+          const isAway = () => {
+            try { return document.hidden === true || document.hasFocus() === false } catch (err) { return false }
+          }
+          const isSubagent = (sid) => {
+            try {
+              const list = ctxRef.sessions && ctxRef.sessions.list
+              const snap = list && typeof list.getSnapshot === 'function' ? list.getSnapshot() : null
+              const row = snap && snap.byId ? snap.byId[sid] : null
+              return !!(row && typeof row.parentSessionId === 'string' && row.parentSessionId)
+            } catch (err) { return false }
+          }
+          off = ctxRef.remote.$on('api-session/status', (sessionId, isRunning) => {
+            try {
+              const sid = String(sessionId || '')
+              const prev = statusSeen.current.get(sid)
+              statusSeen.current.set(sid, isRunning === true)
+              if (isRunning === true || prev !== true) return
+              if (!isAway() || isSubagent(sid)) return
+              if (doneAt.current && Date.now() - doneAt.current < 3000) return
+              doneAt.current = Date.now()
+              cue('done')
+            } catch (err) {}
+          })
+        } catch (err) {}
+        return () => { try { if (typeof off === 'function') off() } catch (err) {} }
+      }, [])
+
       useEffect(() => {
         if (!pricing) return
         const prev = prevPeak.current
@@ -1327,8 +1370,9 @@ const FORCE_PEAK_PREVIEW = false // 临时：周末全天谷价，强制转峰�
     }
 
     return {
-      inject: ['slots'],
+      inject: ['slots', 'remote', 'sessions'],
       apply(ctx) {
+        ctxRef = ctx
         ctx.slots.inject('shell.overlay', () =>
           ctx.slots.register({ name: 'shell.overlay', id: 'balance-hud', order: 30 }, Hud),
         )
