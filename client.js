@@ -353,23 +353,26 @@ const FORCE_PEAK_PREVIEW = false // 临时：周末全天谷价，强制转峰�
       ' display:flex;align-items:center;justify-content:center;font-size:calc(var(--dbh-size)*.05);',
       ' line-height:1;cursor:pointer;z-index:8;opacity:.28;pointer-events:auto;transition:opacity .18s ease}',
       '.dbh-root:hover .dbh-gear,.dbh-root.cfg .dbh-gear{opacity:.95}',
-      '.dbh-cfg{position:absolute;right:0;bottom:104%;width:86%;box-sizing:border-box;z-index:9;',
+      '.dbh-cfg{position:absolute;right:0;bottom:104%;width:86%;box-sizing:border-box;z-index:9;font-size:clamp(10px,calc(var(--dbh-size)*.05),13px);',
       ' padding:calc(var(--dbh-size)*.055);border-radius:7px;',
       ' background:linear-gradient(180deg,rgba(48,16,8,.98),rgba(18,7,4,.98));',
       ' border:1px solid rgba(255,143,31,.55);color:' + AMBER + ';',
       ' box-shadow:0 10px 28px rgba(0,0,0,.65)}',
-      '.dbh-cfg .ttl{font-size:calc(var(--dbh-size)*.042);letter-spacing:1.4px;color:' + ORANGE + ';font-weight:600}',
+      '.dbh-cfg .ttl{font-size:clamp(9px,calc(var(--dbh-size)*.042),12px);letter-spacing:1.4px;color:' + ORANGE + ';font-weight:600}',
       '.dbh-cfg .row{display:flex;gap:6px;align-items:center;margin-top:calc(var(--dbh-size)*.03)}',
       '.dbh-cfg input{flex:1;min-width:0;box-sizing:border-box;background:rgba(0,0,0,.55);',
       ' border:1px solid rgba(255,143,31,.45);border-radius:4px;outline:none;',
-      ' color:' + AMBER + ';font-family:inherit;font-size:calc(var(--dbh-size)*.045);padding:3px 6px}',
+      ' color:' + AMBER + ';font-family:inherit;font-size:clamp(10px,calc(var(--dbh-size)*.045),13px);padding:3px 6px}',
       '.dbh-cfg button{background:rgba(255,143,31,.18);border:1px solid rgba(255,143,31,.6);border-radius:4px;',
-      ' color:' + ORANGE + ';font-family:inherit;font-size:calc(var(--dbh-size)*.038);padding:4px 9px;cursor:pointer}',
+      ' color:' + ORANGE + ';font-family:inherit;font-size:clamp(9px,calc(var(--dbh-size)*.038),12px);padding:4px 9px;cursor:pointer}',
       '.dbh-cfg input::-webkit-outer-spin-button,.dbh-cfg input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}',
-      '.dbh-cfg .chk{display:flex;align-items:center;gap:6px;font-size:max(11px,calc(var(--dbh-size)*.032));',
+      '.dbh-cfg select{flex:1;min-width:0;box-sizing:border-box;background:rgba(0,0,0,.55);',
+      ' border:1px solid rgba(255,143,31,.45);border-radius:4px;outline:none;',
+      ' color:' + AMBER + ';font-family:inherit;font-size:clamp(10px,calc(var(--dbh-size)*.045),13px);padding:3px 6px}',
+      '.dbh-cfg .chk{display:flex;align-items:center;gap:6px;font-size:clamp(10px,calc(var(--dbh-size)*.034),13px);',
       ' color:' + DIM + '}',
       '.dbh-cfg input[type=checkbox]{flex:0 0 auto;width:auto;accent-color:' + ORANGE + '}',
-      '.dbh-cfg .hint{margin-top:calc(var(--dbh-size)*.028);font-size:calc(var(--dbh-size)*.03);',
+      '.dbh-cfg .hint{margin-top:calc(var(--dbh-size)*.028);font-size:clamp(8px,calc(var(--dbh-size)*.03),11px);',
       ' color:' + DIM + ';line-height:1.45}',
 
       // 提醒态：外圈与投影圈转红（白圈保持白）
@@ -1146,7 +1149,7 @@ const FORCE_PEAK_PREVIEW = false // 临时：周末全天谷价，强制转峰�
             }, '试听'),
           ),
           h('div', { className: 'row', style: { flexWrap: 'nowrap', alignItems: 'center' } },
-            h('span', { style: { whiteSpace: 'nowrap', fontSize: '12px', flexShrink: 0 } }, '语音音效'),
+            h('span', { style: { whiteSpace: 'nowrap', fontSize: 'inherit', flexShrink: 0 } }, '语音音效'),
             h('select', {
               value: voiceFx,
               onChange: (event) => {
@@ -1155,11 +1158,11 @@ const FORCE_PEAK_PREVIEW = false // 临时：周末全天谷价，强制转峰�
                 savePref(ALERT_VOICE_FX_KEY, next)
                 cue('balance', next)
               },
-              style: { marginLeft: 'auto', width: '118px', padding: '2px 4px' },
+              style: { marginLeft: 'auto' },
             }, VOICE_FX_OPTIONS.map((item) => h('option', { key: item[0], value: item[0] }, item[1]))),
           ),
           h('div', { className: 'row', style: { flexWrap: 'nowrap', alignItems: 'center' } },
-            h('span', { style: { whiteSpace: 'nowrap', fontSize: '12px', flexShrink: 0 } }, '音量'),
+            h('span', { style: { whiteSpace: 'nowrap', fontSize: 'inherit', flexShrink: 0 } }, '音量'),
             h('input', {
               type: 'range',
               min: '0',
@@ -1172,9 +1175,9 @@ const FORCE_PEAK_PREVIEW = false // 临时：周末全天谷价，强制转峰�
                 setVoiceVolume(next)
                 savePref('dsh-balance-hud:voicevol', String(next))
               },
-              style: { marginLeft: 'auto', width: '96px' },
+              style: { marginLeft: 'auto', flex: '1 1 0%', minWidth: '0' },
             }),
-            h('span', { style: { minWidth: '36px', textAlign: 'right', fontSize: '12px', flexShrink: 0 } }, voiceVolume + '%'),
+            h('span', { style: { minWidth: 'calc(var(--dbh-size)*.115)', textAlign: 'right', fontSize: 'inherit', flexShrink: 0 } }, voiceVolume + '%'),
           ),
           h('div', { className: 'row' },
             h('label', { className: 'chk' },
